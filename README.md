@@ -143,9 +143,13 @@ See `outputs/dashboard_story.md` for full leadership narrative.
 ---
 
 
+## Screenshots
 
----
-
-
-└── README.md
+| File | Contents |
+|------|---------|
+| `screenshots/full_dashboard.png` | Complete 7-section executive dashboard |
+| `screenshots/sales_trend_view.png` | Monthly sales & profit + margin trend |
+| `screenshots/regional_performance_view.png` | State-level and regional charts |
+| `screenshots/category_profitability_view.png` | Sub-category margin + category revenue |
+| `screenshots/filter_interaction_view.png` | Technology + 2025 filter applied |
 ```
