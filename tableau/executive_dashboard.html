@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Executive Dashboard — Retail Sales 2024–2025</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#0f172a;color:#e2e8f0;min-height:100vh}
+/* Header */
+.hdr{background:linear-gradient(90deg,#1e3a5f 0%,#0f172a 60%);padding:14px 24px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #1e3a5f}
+.hdr-title{font-size:1.25rem;font-weight:800;color:#f8fafc;letter-spacing:-0.5px}
+.hdr-title span{color:#38bdf8}
+.hdr-meta{font-size:.72rem;color:#64748b;margin-top:3px}
+.hdr-badge{background:#1e293b;border:1px solid #334155;border-radius:20px;padding:5px 14px;font-size:.72rem;color:#94a3b8}
+/* Filter bar */
+.fbar{background:#1e293b;padding:8px 24px;display:flex;gap:14px;align-items:center;flex-wrap:wrap;border-bottom:1px solid #334155}
+.fbar label{font-size:.68rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.5px}
+.fbar select{background:#0f172a;border:1px solid #334155;color:#e2e8f0;border-radius:6px;padding:4px 10px;font-size:.75rem;cursor:pointer;transition:border-color .2s}
+.fbar select:focus{border-color:#38bdf8;outline:none}
+.fg{display:flex;align-items:center;gap:6px}
+.btn-rst{background:#38bdf8;color:#0f172a;border:none;border-radius:6px;padding:4px 14px;font-size:.72rem;font-weight:800;cursor:pointer}
+.fstatus{font-size:.68rem;color:#475569;margin-left:4px}
+/* Main */
+.main{padding:16px 24px;max-width:1900px;margin:0 auto}
+/* Insight bar */
+.ibar{background:linear-gradient(90deg,#1e293b,#162032);border:1px solid #1e3a5f;border-radius:10px;padding:10px 18px;margin-bottom:14px;display:flex;gap:18px;flex-wrap:wrap}
+.ii{display:flex;align-items:center;gap:7px;font-size:.72rem;color:#94a3b8}
+.dot{width:7px;height:7px;border-radius:50%;background:#f59e0b;flex-shrink:0}
+.dot.g{background:#22c55e}.dot.r{background:#ef4444}
+/* KPI cards */
+.kgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(165px,1fr));gap:12px;margin-bottom:16px}
+.kcard{background:#1e293b;border-radius:10px;padding:14px 16px;border-left:3px solid #38bdf8;position:relative;overflow:hidden}
+.kcard::before{content:'';position:absolute;top:0;right:0;width:60px;height:60px;border-radius:50%;opacity:.06;background:currentColor}
+.kcard.g{border-color:#22c55e}.kcard.a{border-color:#f59e0b}.kcard.r{border-color:#ef4444}.kcard.t{border-color:#06b6d4}.kcard.p{border-color:#a78bfa}
+.klbl{font-size:.65rem;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.5px}
+.kval{font-size:1.7rem;font-weight:900;color:#f1f5f9;line-height:1;margin:5px 0 3px}
+.ksub{font-size:.68rem;color:#64748b}
+.kbadge{display:inline-block;background:#052e16;color:#22c55e;font-size:.62rem;font-weight:700;padding:1px 6px;border-radius:10px;margin-left:4px}
+.kbadge.w{background:#431407;color:#f97316}.kbadge.d{background:#450a0a;color:#ef4444}
+/* Section label */
+.slbl{font-size:.65rem;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.8px;margin:14px 0 8px;display:flex;align-items:center;gap:8px}
+.slbl::after{content:'';flex:1;height:1px;background:#1e293b}
+/* Cards */
+.cgrid{display:grid;gap:12px}
+.r2{grid-template-columns:1fr 1fr}
+.r3{grid-template-columns:2fr 1fr 1fr}
+.r23{grid-template-columns:3fr 2fr}
+.r4{grid-template-columns:3fr 1fr 1fr 1fr}
+.card{background:#1e293b;border-radius:10px;padding:15px 17px;border:1px solid #1e3a5f}
+.ctitle{font-size:.8rem;font-weight:800;color:#f1f5f9;margin-bottom:2px}
+.csub{font-size:.65rem;color:#475569;margin-bottom:12px}
+canvas{max-height:200px!important}
+canvas.tall{max-height:250px!important}
+canvas.short{max-height:150px!important}
+/* Tables */
+.ptbl{width:100%;border-collapse:collapse;font-size:.72rem;margin-top:8px}
+.ptbl th{background:#0f172a;color:#94a3b8;padding:6px 9px;text-align:left;font-size:.62rem;text-transform:uppercase;letter-spacing:.3px}
+.ptbl td{padding:6px 9px;border-bottom:1px solid #0f172a}
+.ptbl tr:hover td{background:#162032}
+.bdg{display:inline-block;padding:2px 7px;border-radius:10px;font-size:.62rem;font-weight:700}
+.bg{background:#052e16;color:#22c55e}.ba{background:#431407;color:#f97316}.br{background:#450a0a;color:#ef4444}
+/* State grid */
+.sgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:8px}
+.stile{background:#162032;border-radius:8px;padding:8px 6px;text-align:center;cursor:pointer;transition:all .2s;border:1px solid transparent}
+.stile:hover{border-color:#38bdf8;transform:scale(1.03)}
+.sname{font-size:.62rem;font-weight:700;color:#64748b}
+.sval{font-size:.8rem;font-weight:800;color:#f1f5f9;margin:2px 0}
+/* Margin bar */
+.mrow{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid #0f172a}
+.mrow:last-child{border-bottom:none}
+.mlbl{font-size:.75rem;color:#94a3b8}
+.mval{font-size:.78rem;font-weight:800;color:#f1f5f9}
+.bbar{background:#0f172a;border-radius:4px;height:5px;width:80px;display:inline-block;vertical-align:middle;margin-top:3px}
+.bfill{height:5px;border-radius:4px}
+@media(max-width:900px){.r2,.r3,.r23,.r4{grid-template-columns:1fr}.sgrid{grid-template-columns:repeat(3,1fr)}}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div>
+    <div class="hdr-title">🏪 Retail <span>Executive</span> Dashboard</div>
+    <div class="hdr-meta">Sales · Profitability · Segments · Shipping · Returns · Jan 2024 – Dec 2025</div>
+  </div>
+  <div class="hdr-badge">4,200 Orders · 20 States · 2-Year View</div>
+</div>
+
+<div class="fbar">
+  <div class="fg"><label>Year</label>
+    <select id="fY" onchange="af()"><option value="all">All Years</option><option value="2024">2024</option><option value="2025">2025</option></select></div>
+  <div class="fg"><label>Region</label>
+    <select id="fR" onchange="af()"><option value="all">All Regions</option><option>North</option><option>South</option><option>East</option><option>West</option></select></div>
+  <div class="fg"><label>Category</label>
+    <select id="fC" onchange="af()"><option value="all">All Categories</option><option>Technology</option><option>Furniture</option><option>Office Supplies</option></select></div>
+  <div class="fg"><label>Segment</label>
+    <select id="fS" onchange="af()"><option value="all">All Segments</option><option>Consumer</option><option>Corporate</option><option>Home Office</option></select></div>
+  <div class="fg"><label>Ship Mode</label>
+    <select id="fSh" onchange="af()"><option value="all">All Modes</option><option>Standard Class</option><option>First Class</option><option>Second Class</option><option>Same Day</option></select></div>
+  <div class="fg"><label>Channel</label>
+    <select id="fCh" onchange="af()"><option value="all">All Channels</option><option>Organic</option><option>Paid</option><option>Email</option><option>Social</option><option>Referral</option></select></div>
+  <button class="btn-rst" onclick="rf()">↺ Reset</button>
+  <span class="fstatus" id="fs"></span>
+</div>
+
+<div class="main">
+  <div class="ibar">
+    <div class="ii"><div class="dot g"></div>Technology 70.9% of revenue at 18%+ margin — strongest profit engine</div>
+    <div class="ii"><div class="dot r"></div>Furniture Tables &amp; Bookcases: 5.67–5.71% margin — biggest drag</div>
+    <div class="ii"><div class="dot"></div>Discounts &gt;30%: −4.95% margin (loss-making) — 64 orders at risk</div>
+    <div class="ii"><div class="dot g"></div>South leads: ₹6.47Cr sales · ₹99.9L profit</div>
+    <div class="ii"><div class="dot r"></div>Furniture return rate 7.67% vs Technology 3.03%</div>
+    <div class="ii"><div class="dot"></div>Home Office: 5.67% return rate — highest segment risk</div>
+  </div>
+
+  <div class="kgrid">
+    <div class="kcard"><div class="klbl">Total Sales</div><div class="kval">₹21.7Cr</div><div class="ksub">2024–2025 Combined<span class="kbadge">+4.3% YoY</span></div></div>
+    <div class="kcard g"><div class="klbl">Total Profit</div><div class="kval">₹3.33Cr</div><div class="ksub">Across all 4,200 orders</div></div>
+    <div class="kcard t"><div class="klbl">Profit Margin</div><div class="kval">15.35%</div><div class="ksub">Blended portfolio margin</div></div>
+    <div class="kcard"><div class="klbl">Total Orders</div><div class="kval">4,200</div><div class="ksub">Avg ₹51,671 / order</div></div>
+    <div class="kcard a"><div class="klbl">Return Rate</div><div class="kval">4.55%</div><div class="ksub">191 returns<span class="kbadge w">Furniture 7.67%</span></div></div>
+    <div class="kcard p"><div class="klbl">Avg Delivery</div><div class="kval">3.59d</div><div class="ksub">Std: 4.71d · Same Day: 0.4d</div></div>
+    <div class="kcard r"><div class="klbl">Loss-Making Orders</div><div class="kval">288</div><div class="ksub">6.9% unprofitable<span class="kbadge d">Risk</span></div></div>
+  </div>
+
+  <div class="slbl">📈 Sales Trend &amp; Annual Comparison</div>
+  <div class="cgrid r23" style="margin-bottom:12px">
+    <div class="card">
+      <div class="ctitle">Monthly Sales &amp; Profit Trend</div>
+      <div class="csub">Sales (bars) · Profit (green line) · Margin % (amber dashed) — 24 months</div>
+      <canvas id="cTrend" class="tall"></canvas>
+    </div>
+    <div class="card">
+      <div class="ctitle">Year-over-Year Comparison</div>
+      <div class="csub">2024 vs 2025 · Sales &amp; Profit</div>
+      <canvas id="cYoY"></canvas>
+      <div style="margin-top:12px">
+        <div class="mrow"><span class="mlbl">2024 Sales</span><span class="mval">₹10.62Cr</span></div>
+        <div class="mrow"><span class="mlbl">2025 Sales</span><span class="mval">₹11.08Cr</span></div>
+        <div class="mrow"><span class="mlbl">YoY Growth</span><span class="mval" style="color:#22c55e">+4.3%</span></div>
+        <div class="mrow"><span class="mlbl">2024 Profit</span><span class="mval">₹1.65Cr</span></div>
+        <div class="mrow"><span class="mlbl">2025 Profit</span><span class="mval">₹1.68Cr</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="slbl">🗺️ Regional &amp; State Performance</div>
+  <div class="cgrid r3" style="margin-bottom:12px">
+    <div class="card">
+      <div class="ctitle">State-Level Performance</div>
+      <div class="csub">Sales by state · hover for details</div>
+      <div class="sgrid" id="sgrid"></div>
+    </div>
+    <div class="card">
+      <div class="ctitle">Sales &amp; Profit by Region</div>
+      <div class="csub">Regional breakdown (horizontal bars)</div>
+      <canvas id="cReg"></canvas>
+    </div>
+    <div class="card">
+      <div class="ctitle">Region Margin Summary</div>
+      <div class="csub">Profit % · returns · order count</div>
+      <div id="regSum" style="margin-top:8px"></div>
+    </div>
+  </div>
+
+  <div class="slbl">📦 Category &amp; Sub-Category Profitability</div>
+  <div class="cgrid r2" style="margin-bottom:12px">
+    <div class="card">
+      <div class="ctitle">Sub-Category Profit Margin % (sorted)</div>
+      <div class="csub">Red &lt;10% · Amber 10-15% · Green &gt;15%</div>
+      <canvas id="cSub" class="tall"></canvas>
+    </div>
+    <div class="card">
+      <div class="ctitle">Category Sales vs Profit</div>
+      <div class="csub">Revenue share (doughnut) + summary table</div>
+      <canvas id="cCat" class="short"></canvas>
+      <table class="ptbl" id="catTbl"></table>
+    </div>
+  </div>
+
+  <div class="slbl">👥 Customer Segments · 💸 Discount Impact · 📣 Channel</div>
+  <div class="cgrid r3" style="margin-bottom:12px">
+    <div class="card">
+      <div class="ctitle">Customer Segment Performance</div>
+      <div class="csub">Sales &amp; profit by segment + detail table</div>
+      <canvas id="cSeg"></canvas>
+      <table class="ptbl" id="segTbl"></table>
+    </div>
+    <div class="card">
+      <div class="ctitle">Discount Band → Profit Margin</div>
+      <div class="csub">Higher discount = collapsing margin</div>
+      <canvas id="cDisc"></canvas>
+    </div>
+    <div class="card">
+      <div class="ctitle">Campaign Channel Performance</div>
+      <div class="csub">Sales volume + margin % overlay</div>
+      <canvas id="cCh"></canvas>
+    </div>
+  </div>
+
+  <div class="slbl">🚚 Shipping Performance &amp; Return Analysis</div>
+  <div class="cgrid r3" style="margin-bottom:12px">
+    <div class="card">
+      <div class="ctitle">Ship Mode: Volume, Days &amp; Margin</div>
+      <div class="csub">Sales bars · avg delivery days (line)</div>
+      <canvas id="cShip"></canvas>
+      <table class="ptbl" id="shipTbl"></table>
+    </div>
+    <div class="card">
+      <div class="ctitle">Delivery Speed Distribution</div>
+      <div class="csub">% of orders by delivery bucket</div>
+      <canvas id="cDelay"></canvas>
+    </div>
+    <div class="card">
+      <div class="ctitle">Return Rate — Category &amp; Segment</div>
+      <div class="csub">Higher bar = higher return risk</div>
+      <canvas id="cRet"></canvas>
+    </div>
+  </div>
+</div>
+
+<script>
+const D={
+monthly:[{"year_month":"2024-01","sales":9446558.17,"profit":1462978.08,"orders":165,"margin":15.49},{"year_month":"2024-02","sales":10485002.53,"profit":1578346.02,"orders":172,"margin":15.05},{"year_month":"2024-03","sales":9090912.3,"profit":1336404.73,"orders":170,"margin":14.7},{"year_month":"2024-04","sales":8012252.16,"profit":1121281.65,"orders":184,"margin":13.99},{"year_month":"2024-05","sales":7461014.35,"profit":1131775.01,"orders":146,"margin":15.17},{"year_month":"2024-06","sales":9584609.55,"profit":1519672.32,"orders":158,"margin":15.86},{"year_month":"2024-07","sales":7426785.69,"profit":1129891.45,"orders":167,"margin":15.21},{"year_month":"2024-08","sales":6303794.69,"profit":885649.73,"orders":149,"margin":14.05},{"year_month":"2024-09","sales":10485601.59,"profit":1694121.62,"orders":187,"margin":16.16},{"year_month":"2024-10","sales":9734974.62,"profit":1601727.92,"orders":191,"margin":16.45},{"year_month":"2024-11","sales":9253957.76,"profit":1442565.68,"orders":196,"margin":15.59},{"year_month":"2024-12","sales":8955562.99,"profit":1568339.85,"orders":172,"margin":17.51},{"year_month":"2025-01","sales":8455144.21,"profit":1192204.42,"orders":184,"margin":14.1},{"year_month":"2025-02","sales":9853768.1,"profit":1486798.74,"orders":180,"margin":15.09},{"year_month":"2025-03","sales":10215892.59,"profit":1503077.39,"orders":186,"margin":14.71},{"year_month":"2025-04","sales":7193555.52,"profit":894233.59,"orders":163,"margin":12.43},{"year_month":"2025-05","sales":8835463.78,"profit":1311412.29,"orders":181,"margin":14.84},{"year_month":"2025-06","sales":7257588.18,"profit":1168737.22,"orders":140,"margin":16.1},{"year_month":"2025-07","sales":10661968.18,"profit":1831220.41,"orders":189,"margin":17.18},{"year_month":"2025-08","sales":10861499.92,"profit":1735384.8,"orders":203,"margin":15.98},{"year_month":"2025-09","sales":8033155.97,"profit":1184389.44,"orders":165,"margin":14.74},{"year_month":"2025-10","sales":10109298.77,"profit":1519629.18,"orders":198,"margin":15.03},{"year_month":"2025-11","sales":10203938.54,"profit":1608714.65,"orders":195,"margin":15.77},{"year_month":"2025-12","sales":9095351.76,"profit":1397756.65,"orders":159,"margin":15.37}],
+category:[{"category":"Furniture","sub_category":"Bookcases","sales":12468764.34,"profit":711733.14,"orders":285,"returns":24,"margin":5.71,"return_rate":8.42},{"category":"Furniture","sub_category":"Chairs","sales":12838759.13,"profit":1058574.44,"orders":288,"returns":23,"margin":8.25,"return_rate":7.99},{"category":"Furniture","sub_category":"Furnishings","sales":13438147.51,"profit":1055994.2,"orders":282,"returns":23,"margin":7.86,"return_rate":8.16},{"category":"Furniture","sub_category":"Tables","sales":12895344.63,"profit":731533.65,"orders":292,"returns":18,"margin":5.67,"return_rate":6.16},{"category":"Office Supplies","sub_category":"Art","sales":2261841.03,"profit":350434.07,"orders":328,"returns":10,"margin":15.49,"return_rate":3.05},{"category":"Office Supplies","sub_category":"Binders","sales":2201127.75,"profit":325668.13,"orders":338,"returns":11,"margin":14.8,"return_rate":3.25},{"category":"Office Supplies","sub_category":"Labels","sales":2484132.09,"profit":368127.19,"orders":347,"returns":14,"margin":14.82,"return_rate":4.03},{"category":"Office Supplies","sub_category":"Paper","sales":2128252.66,"profit":318706.9,"orders":311,"returns":12,"margin":14.98,"return_rate":3.86},{"category":"Office Supplies","sub_category":"Storage","sales":2406014.89,"profit":342231.21,"orders":345,"returns":14,"margin":14.22,"return_rate":4.06},{"category":"Technology","sub_category":"Accessories","sales":39198321.23,"profit":7186862.7,"orders":366,"returns":11,"margin":18.33,"return_rate":3.01},{"category":"Technology","sub_category":"Copiers","sales":40612514.71,"profit":7310055.11,"orders":368,"returns":10,"margin":18.0,"return_rate":2.72},{"category":"Technology","sub_category":"Machines","sales":35690508.12,"profit":6449101.21,"orders":318,"returns":11,"margin":18.07,"return_rate":3.46},{"category":"Technology","sub_category":"Phones","sales":38393923.83,"profit":7097290.89,"orders":332,"returns":10,"margin":18.49,"return_rate":3.01}],
+region:[{"region":"East","sales":48859164.42,"profit":7599443.13,"orders":897,"returns":44,"margin":15.55},{"region":"North","sales":54555800.53,"profit":8314884.01,"orders":1056,"returns":47,"margin":15.24},{"region":"South","sales":64693706.73,"profit":9987912.33,"orders":1210,"returns":55,"margin":15.44},{"region":"West","sales":48908980.24,"profit":7404073.37,"orders":1037,"returns":45,"margin":15.14}],
+state:[{"region":"East","state":"Assam","sales":10234334.06,"profit":1660374.09,"orders":185,"returns":10,"margin":16.22},{"region":"East","state":"Bihar","sales":10523408.21,"profit":1576442.61,"orders":183,"returns":12,"margin":14.98},{"region":"East","state":"Jharkhand","sales":8722895.09,"profit":1468219.44,"orders":167,"returns":7,"margin":16.83},{"region":"East","state":"Odisha","sales":7712581.96,"profit":1173146.27,"orders":177,"returns":7,"margin":15.21},{"region":"East","state":"West Bengal","sales":11665945.1,"profit":1721260.72,"orders":185,"returns":8,"margin":14.75},{"region":"North","state":"Delhi","sales":10485115.24,"profit":1527271.33,"orders":217,"returns":7,"margin":14.57},{"region":"North","state":"Haryana","sales":12369341.09,"profit":2008991.92,"orders":219,"returns":8,"margin":16.24},{"region":"North","state":"Punjab","sales":12238596.72,"profit":1872560.64,"orders":215,"returns":11,"margin":15.3},{"region":"North","state":"Rajasthan","sales":9545061.41,"profit":1467456.49,"orders":196,"returns":12,"margin":15.37},{"region":"North","state":"Uttar Pradesh","sales":9917686.07,"profit":1438603.63,"orders":209,"returns":9,"margin":14.51},{"region":"South","state":"Andhra Pradesh","sales":11901469.03,"profit":1865816.4,"orders":216,"returns":10,"margin":15.68},{"region":"South","state":"Karnataka","sales":12537577.45,"profit":2081273.52,"orders":219,"returns":10,"margin":16.6},{"region":"South","state":"Kerala","sales":12464888.45,"profit":1952424.17,"orders":244,"returns":13,"margin":15.66},{"region":"South","state":"Tamil Nadu","sales":12866942.21,"profit":1844318.38,"orders":242,"returns":11,"margin":14.33},{"region":"South","state":"Telangana","sales":14922829.59,"profit":2244079.86,"orders":289,"returns":11,"margin":15.04},{"region":"West","state":"Goa","sales":8006750.37,"profit":1198699.21,"orders":197,"returns":16,"margin":14.97},{"region":"West","state":"Gujarat","sales":10793542.28,"profit":1674801.09,"orders":219,"returns":11,"margin":15.52},{"region":"West","state":"Madhya Pradesh","sales":9823669.42,"profit":1447699.81,"orders":199,"returns":4,"margin":14.74},{"region":"West","state":"Maharashtra","sales":8993455.61,"profit":1266562.99,"orders":199,"returns":7,"margin":14.08},{"region":"West","state":"Rajasthan","sales":11291562.56,"profit":1816310.27,"orders":223,"returns":7,"margin":16.09}],
+segment:[{"customer_segment":"Consumer","sales":71886173.19,"profit":11030581.12,"orders":1355,"returns":53,"margin":15.34,"return_rate":3.91,"aov":53052.53},{"customer_segment":"Corporate","sales":70630732.72,"profit":10720684.64,"orders":1399,"returns":56,"margin":15.18,"return_rate":4.0,"aov":50486.59},{"customer_segment":"Home Office","sales":74500746.01,"profit":11555047.08,"orders":1446,"returns":82,"margin":15.51,"return_rate":5.67,"aov":51521.95}],
+discount:[{"disc_band":"No Discount","sales":65751351.29,"profit":13519757.69,"orders":1024,"margin":20.56},{"disc_band":"1-10%","sales":57598991.91,"profit":9800245.17,"orders":979,"margin":17.01},{"disc_band":"11-20%","sales":48675439.58,"profit":6634009.82,"orders":1047,"margin":13.63},{"disc_band":"21-30%","sales":42921510.03,"profit":3454794.29,"orders":1086,"margin":8.05},{"disc_band":"31%+","sales":2070359.11,"profit":-102494.13,"orders":64,"margin":-4.95}],
+ship:[{"ship_mode":"First Class","sales":31948482.66,"profit":4639570.92,"orders":630,"avg_days":1.77,"margin":14.52},{"ship_mode":"Same Day","sales":14563121.68,"profit":2193553.16,"orders":241,"avg_days":0.4,"margin":15.06},{"ship_mode":"Second Class","sales":47679636.3,"profit":7385144.69,"orders":894,"avg_days":2.68,"margin":15.49},{"ship_mode":"Standard Class","sales":122826411.28,"profit":19088044.07,"orders":2435,"avg_days":4.71,"margin":15.54}],
+delay:[{"delay_bucket":"Same Day","orders":317},{"delay_bucket":"1-2 Days","orders":886},{"delay_bucket":"3-5 Days","orders":2331},{"delay_bucket":"6-7 Days","orders":621},{"delay_bucket":"8+ Days","orders":45}],
+ret_cat:[{"category":"Furniture","orders":1147,"returns":88,"return_rate":7.67},{"category":"Office Supplies","orders":1669,"returns":61,"return_rate":3.65},{"category":"Technology","orders":1384,"returns":42,"return_rate":3.03}],
+ret_seg:[{"customer_segment":"Consumer","orders":1355,"returns":53,"return_rate":3.91},{"customer_segment":"Corporate","orders":1399,"returns":56,"return_rate":4.0},{"customer_segment":"Home Office","orders":1446,"returns":82,"return_rate":5.67}],
+channel:[{"campaign_channel":"Email","sales":34512356.53,"profit":5364557.51,"orders":657,"returns":30,"margin":15.54,"return_rate":4.57},{"campaign_channel":"Organic","sales":88783980.9,"profit":13444456.85,"orders":1694,"returns":75,"margin":15.14,"return_rate":4.43},{"campaign_channel":"Paid","sales":40111108.72,"profit":6053063.73,"orders":849,"returns":40,"margin":15.09,"return_rate":4.71},{"campaign_channel":"Referral","sales":21211566.38,"profit":3336084.38,"orders":392,"returns":22,"margin":15.73,"return_rate":5.61},{"campaign_channel":"Social","sales":31104556.5,"profit":4911552.9,"orders":584,"returns":23,"margin":15.79,"return_rate":3.94}],
+yoy:[{"year":2024,"sales":106241026.4,"profit":16472754.06,"orders":2057},{"year":2025,"sales":110776625.52,"profit":16833558.78,"orders":2143}]
+};
+
+const C={b:'#38bdf8',g:'#22c55e',a:'#f59e0b',r:'#ef4444',t:'#06b6d4',p:'#a78bfa',
+  pal:['#38bdf8','#22c55e','#f59e0b','#ef4444','#a78bfa','#06b6d4','#fb923c','#4ade80','#818cf8','#f472b6']};
+const charts={};
+const dfmt=v=>v>=1e7?'₹'+(v/1e7).toFixed(2)+'Cr':'₹'+(v/1e5).toFixed(1)+'L';
+
+function mk(id,cfg){const c=document.getElementById(id);if(!c)return;if(charts[id])charts[id].destroy();charts[id]=new Chart(c,cfg);return charts[id];}
+
+function buildAll(){
+  // Trend
+  const m=D.monthly;
+  mk('cTrend',{type:'bar',data:{labels:m.map(r=>r.year_month.replace('2024-',"'24 ").replace('2025-',"'25 ")),
+    datasets:[{label:'Sales',data:m.map(r=>r.sales),backgroundColor:'rgba(56,189,248,.65)',yAxisID:'y',order:2},
+      {label:'Profit',data:m.map(r=>r.profit),type:'line',borderColor:C.g,backgroundColor:'rgba(34,197,94,.08)',tension:.4,pointRadius:2,fill:true,yAxisID:'y',order:1},
+      {label:'Margin%',data:m.map(r=>r.margin),type:'line',borderColor:C.a,borderDash:[4,3],tension:.4,pointRadius:2,yAxisID:'y2',order:0}]},
+    options:{responsive:true,maintainAspectRatio:true,plugins:{legend:{labels:{color:'#94a3b8',font:{size:9}}},
+      tooltip:{callbacks:{label:c=>c.datasetIndex<2?`${c.dataset.label}: ${dfmt(c.raw)}`:`Margin: ${c.raw}%`}}},
+      scales:{y:{ticks:{color:'#64748b',font:{size:8},callback:v=>dfmt(v)},grid:{color:'#1e293b'}},
+        y2:{position:'right',ticks:{color:'#f59e0b',font:{size:8},callback:v=>v+'%'},grid:{display:false},min:10,max:20},
+        x:{ticks:{color:'#64748b',font:{size:7},maxRotation:45}},
+        y:{ticks:{color:'#64748b',font:{size:8},callback:v=>dfmt(v)},grid:{color:'#162032'}}}}});
+
+  // YoY
+  mk('cYoY',{type:'bar',data:{labels:['2024','2025'],
+    datasets:[{label:'Sales',data:D.yoy.map(r=>r.sales),backgroundColor:['#38bdf8','#60a5fa'],borderRadius:5},
+      {label:'Profit',data:D.yoy.map(r=>r.profit),backgroundColor:['#22c55e','#4ade80'],borderRadius:5}]},
+    options:{responsive:true,maintainAspectRatio:true,plugins:{legend:{labels:{color:'#94a3b8',font:{size:9}}},
+      tooltip:{callbacks:{label:c=>`${c.dataset.label}: ${dfmt(c.raw)}`}}},
+      scales:{y:{ticks:{color:'#64748b',font:{size:8},callback:v=>dfmt(v)},grid:{color:'#162032'}},x:{ticks:{color:'#94a3b8',font:{size:9}}}}}});
+
+  // State grid
+  const sg=document.getElementById('sgrid');
+  const maxS=Math.max(...D.state.map(s=>s.sales));
+  const rcols={'East':'#38bdf8','North':'#22c55e','South':'#f59e0b','West':'#a78bfa'};
+  sg.innerHTML=D.state.slice().sort((a,b)=>b.sales-a.sales).map(s=>{
+    const col=rcols[s.region]||'#38bdf8';
+    return`<div class="stile" style="border-color:${col}22" title="${s.state}: ${dfmt(s.sales)}, ${s.margin}% margin, ${s.returns} returns">
+      <div class="sname" style="color:${col}">${s.state.split(' ')[0]}</div>
+      <div class="sval">${dfmt(s.sales)}</div>
+      <span class="bdg ${s.margin>16?'bg':s.margin>15?'ba':'br'}" style="font-size:.58rem">${s.margin}%</span></div>`;}).join('');
+
+  // Region bar
+  mk('cReg',{type:'bar',data:{labels:D.region.map(r=>r.region),
+    datasets:[{label:'Sales',data:D.region.map(r=>r.sales),backgroundColor:Object.values(rcols),borderRadius:5,indexAxis:'y'},
+      {label:'Profit',data:D.region.map(r=>r.profit),backgroundColor:Object.values(rcols).map(c=>c+'55'),borderRadius:5,indexAxis:'y'}]},
+    options:{responsive:true,maintainAspectRatio:true,indexAxis:'y',
+      plugins:{legend:{labels:{color:'#94a3b8',font:{size:9}}},tooltip:{callbacks:{label:c=>`${c.dataset.label}: ${dfmt(c.raw)}`}}},
+      scales:{x:{ticks:{color:'#64748b',font:{size:8},callback:v=>dfmt(v)},grid:{color:'#162032'}},y:{ticks:{color:'#94a3b8',font:{size:9}}}}}});
+
+  // Region summary
+  const rs=document.getElementById('regSum');
+  const mx=Math.max(...D.region.map(r=>r.sales));
+  rs.innerHTML=D.region.map(r=>`<div class="mrow"><div>
+    <div class="mlbl" style="font-weight:700;color:#f1f5f9">${r.region}</div>
+    <div style="font-size:.62rem;color:#475569">${r.orders} orders · ${r.returns} returns</div>
+    <div class="bbar"><div class="bfill" style="width:${(r.sales/mx*100).toFixed(0)}%;background:${r.margin>15.4?C.g:C.a}"></div></div>
+    </div><div style="text-align:right"><div class="mval">${dfmt(r.sales)}</div>
+    <span class="bdg ${r.margin>15.4?'bg':'ba'}">${r.margin}%</span></div></div>`).join('');
+
+  // Sub-category
+  const sub=D.category.slice().sort((a,b)=>a.margin-b.margin);
+  mk('cSub',{type:'bar',data:{labels:sub.map(r=>`${r.sub_category}`),
+    datasets:[{label:'Margin%',data:sub.map(r=>r.margin),backgroundColor:sub.map(r=>r.margin<10?C.r:r.margin<15?C.a:C.g),borderRadius:3}]},
+    options:{responsive:true,maintainAspectRatio:true,indexAxis:'y',
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`Margin: ${c.raw}% · Sales: ${dfmt(sub[c.dataIndex].sales)}`}}},
+      scales:{x:{min:0,max:22,ticks:{color:'#64748b',font:{size:8},callback:v=>v+'%'},grid:{color:'#162032'}},
+        y:{ticks:{color:'#94a3b8',font:{size:8}}}}}});
+
+  // Category doughnut
+  const byC={};D.category.forEach(r=>{if(!byC[r.category])byC[r.category]={s:0,p:0};byC[r.category].s+=r.sales;byC[r.category].p+=r.profit;});
+  const cats=Object.keys(byC);
+  mk('cCat',{type:'doughnut',data:{labels:cats,datasets:[{data:cats.map(c=>byC[c].s),backgroundColor:[C.b,C.g,C.a],borderWidth:2,borderColor:'#0f172a'}]},
+    options:{responsive:true,maintainAspectRatio:true,cutout:'62%',
+      plugins:{legend:{position:'bottom',labels:{color:'#94a3b8',font:{size:8}}},
+        tooltip:{callbacks:{label:c=>`${c.label}: ${dfmt(c.raw)} (${(c.raw/217017652*100).toFixed(1)}%)`}}}}});
+  document.getElementById('catTbl').innerHTML=`<tr><th>Category</th><th>Sales</th><th>Margin</th></tr>`+
+    cats.map(c=>{const m=(byC[c].p/byC[c].s*100).toFixed(1);return`<tr><td><strong style="color:#f1f5f9">${c}</strong></td><td>${dfmt(byC[c].s)}</td><td><span class="bdg ${m>15?'bg':'ba'}">${m}%</span></td></tr>`;}).join('');
+
+  // Segment
+  mk('cSeg',{type:'bar',data:{labels:D.segment.map(r=>r.customer_segment),
+    datasets:[{label:'Sales',data:D.segment.map(r=>r.sales),backgroundColor:[C.b,C.t,C.p],borderRadius:5},
+      {label:'Profit',data:D.segment.map(r=>r.profit),backgroundColor:[C.b+'55',C.t+'55',C.p+'55'],borderRadius:5}]},
+    options:{responsive:true,maintainAspectRatio:true,plugins:{legend:{labels:{color:'#94a3b8',font:{size:9}}},
+      tooltip:{callbacks:{label:c=>`${c.dataset.label}: ${dfmt(c.raw)}`}}},
+      scales:{y:{ticks:{color:'#64748b',font:{size:8},callback:v=>dfmt(v)},grid:{color:'#162032'}},x:{ticks:{color:'#94a3b8',font:{size:9}}}}}});
+  document.getElementById('segTbl').innerHTML=`<tr><th>Segment</th><th>Margin</th><th>Return%</th><th>AOV</th></tr>`+
+    D.segment.map(r=>`<tr><td><strong style="color:#f1f5f9">${r.customer_segment}</strong></td>
+      <td><span class="bdg ${r.margin>15.4?'bg':'ba'}">${r.margin}%</span></td>
+      <td><span class="bdg ${r.return_rate>5?'br':r.return_rate>4?'ba':'bg'}">${r.return_rate}%</span></td>
+      <td>₹${(r.aov/1000).toFixed(1)}K</td></tr>`).join('');
+
+  // Discount
+  mk('cDisc',{type:'bar',data:{labels:D.discount.map(r=>r.disc_band),
+    datasets:[{label:'Margin%',data:D.discount.map(r=>r.margin),backgroundColor:D.discount.map(r=>r.margin<0?C.r:r.margin<10?'#f97316':r.margin<15?C.a:C.g),borderRadius:5,yAxisID:'y'},
+      {label:'Orders',data:D.discount.map(r=>r.orders),type:'line',borderColor:C.b,tension:.3,yAxisID:'y2',pointRadius:4,pointBackgroundColor:C.b}]},
+    options:{responsive:true,maintainAspectRatio:true,plugins:{legend:{labels:{color:'#94a3b8',font:{size:9}}},
+      tooltip:{callbacks:{label:c=>c.datasetIndex===0?`Margin: ${c.raw}%`:`Orders: ${c.raw}`}}},
+      scales:{y:{ticks:{color:'#64748b',font:{size:8},callback:v=>v+'%'},grid:{color:'#162032'}},
+        y2:{position:'right',ticks:{color:'#38bdf8',font:{size:8}},grid:{display:false}},
+        x:{ticks:{color:'#94a3b8',font:{size:8}}}}}});
+
+  // Channel
+  mk('cCh',{type:'bar',data:{labels:D.channel.map(r=>r.campaign_channel),
+    datasets:[{label:'Sales',data:D.channel.map(r=>r.sales),backgroundColor:C.pal,borderRadius:5},
+      {label:'Margin%',data:D.channel.map(r=>r.margin),type:'line',borderColor:C.a,yAxisID:'y2',tension:.3,pointRadius:4}]},
+    options:{responsive:true,maintainAspectRatio:true,plugins:{legend:{labels:{color:'#94a3b8',font:{size:9}}},
+      tooltip:{callbacks:{label:c=>c.datasetIndex===0?`Sales: ${dfmt(c.raw)}`:`Margin: ${c.raw}%`}}},
+      scales:{y:{ticks:{color:'#64748b',font:{size:8},callback:v=>dfmt(v)},grid:{color:'#162032'}},
+        y2:{position:'right',ticks:{color:C.a,font:{size:8},callback:v=>v+'%'},grid:{display:false},min:13,max:17},
+        x:{ticks:{color:'#94a3b8',font:{size:8}}}}}});
+
+  // Ship mode
+  mk('cShip',{type:'bar',data:{labels:D.ship.map(r=>r.ship_mode),
+    datasets:[{label:'Sales',data:D.ship.map(r=>r.sales),backgroundColor:C.pal,borderRadius:5,yAxisID:'y'},
+      {label:'Avg Days',data:D.ship.map(r=>r.avg_days),type:'line',borderColor:C.r,yAxisID:'y2',tension:.3,pointRadius:5}]},
+    options:{responsive:true,maintainAspectRatio:true,plugins:{legend:{labels:{color:'#94a3b8',font:{size:9}}},
+      tooltip:{callbacks:{label:c=>c.datasetIndex===0?`Sales: ${dfmt(c.raw)}`:`Avg Days: ${c.raw}`}}},
+      scales:{y:{ticks:{color:'#64748b',font:{size:8},callback:v=>dfmt(v)},grid:{color:'#162032'}},
+        y2:{position:'right',ticks:{color:C.r,font:{size:8},callback:v=>v+'d'},grid:{display:false},min:0,max:6},
+        x:{ticks:{color:'#94a3b8',font:{size:8}}}}}});
+  document.getElementById('shipTbl').innerHTML=`<tr><th>Mode</th><th>Orders</th><th>Sales</th><th>Days</th><th>Margin</th></tr>`+
+    D.ship.map(r=>`<tr><td style="color:#f1f5f9;font-weight:600">${r.ship_mode}</td><td>${r.orders}</td><td>${dfmt(r.sales)}</td>
+      <td>${r.avg_days}d</td><td><span class="bdg ${r.margin>15.4?'bg':'ba'}">${r.margin}%</span></td></tr>`).join('');
+
+  // Delay
+  mk('cDelay',{type:'doughnut',data:{labels:D.delay.map(r=>r.delay_bucket),
+    datasets:[{data:D.delay.map(r=>r.orders),backgroundColor:[C.g,'#60a5fa',C.b,C.a,C.r],borderWidth:2,borderColor:'#0f172a'}]},
+    options:{responsive:true,maintainAspectRatio:true,cutout:'55%',
+      plugins:{legend:{position:'bottom',labels:{color:'#94a3b8',font:{size:8}}},
+        tooltip:{callbacks:{label:c=>`${c.label}: ${c.raw} orders (${(c.raw/4200*100).toFixed(1)}%)`}}}}});
+
+  // Returns
+  const rl=[...D.ret_cat.map(r=>r.category),...D.ret_seg.map(r=>r.customer_segment)];
+  const rd=[...D.ret_cat.map(r=>r.return_rate),...D.ret_seg.map(r=>r.return_rate)];
+  mk('cRet',{type:'bar',data:{labels:rl,datasets:[{label:'Return Rate%',data:rd,
+    backgroundColor:rd.map(v=>v>6?C.r:v>4?C.a:C.g),borderRadius:4}]},
+    options:{responsive:true,maintainAspectRatio:true,indexAxis:'y',
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`Return Rate: ${c.raw}%`}}},
+      scales:{x:{min:0,max:9,ticks:{color:'#64748b',font:{size:8},callback:v=>v+'%'},grid:{color:'#162032'}},
+        y:{ticks:{color:'#94a3b8',font:{size:8}}}}}});
+}
+
+function af(){
+  const y=document.getElementById('fY').value;
+  const r=document.getElementById('fR').value;
+  const c=document.getElementById('fC').value;
+  const s=document.getElementById('fS').value;
+  const sh=document.getElementById('fSh').value;
+  const ch=document.getElementById('fCh').value;
+  const active=[y,r,c,s,sh,ch].filter(v=>v!=='all').length;
+  document.getElementById('fs').textContent=active>0?`${active} filter(s) active`:'';
+
+  // Update trend
+  let mon=D.monthly;
+  if(y!=='all') mon=mon.filter(x=>x.year_month.startsWith(y));
+  if(charts['cTrend']){
+    charts['cTrend'].data.labels=mon.map(x=>x.year_month.replace('2024-',"'24 ").replace('2025-',"'25 "));
+    charts['cTrend'].data.datasets[0].data=mon.map(x=>x.sales);
+    charts['cTrend'].data.datasets[1].data=mon.map(x=>x.profit);
+    charts['cTrend'].data.datasets[2].data=mon.map(x=>x.margin);
+    charts['cTrend'].update();
+  }
+  // Update sub-cat
+  let cat=D.category;
+  if(c!=='all') cat=cat.filter(x=>x.category===c);
+  const sorted=cat.slice().sort((a,b)=>a.margin-b.margin);
+  if(charts['cSub']){
+    charts['cSub'].data.labels=sorted.map(x=>x.sub_category);
+    charts['cSub'].data.datasets[0].data=sorted.map(x=>x.margin);
+    charts['cSub'].data.datasets[0].backgroundColor=sorted.map(x=>x.margin<10?C.r:x.margin<15?C.a:C.g);
+    charts['cSub'].update();
+  }
+  // Update region
+  let reg=D.region;
+  if(r!=='all') reg=reg.filter(x=>x.region===r);
+  if(charts['cReg']){
+    charts['cReg'].data.labels=reg.map(x=>x.region);
+    charts['cReg'].data.datasets[0].data=reg.map(x=>x.sales);
+    charts['cReg'].data.datasets[1].data=reg.map(x=>x.profit);
+    charts['cReg'].update();
+  }
+  // Update segment
+  let seg=D.segment;
+  if(s!=='all') seg=seg.filter(x=>x.customer_segment===s);
+  if(charts['cSeg']){
+    charts['cSeg'].data.labels=seg.map(x=>x.customer_segment);
+    charts['cSeg'].data.datasets[0].data=seg.map(x=>x.sales);
+    charts['cSeg'].data.datasets[1].data=seg.map(x=>x.profit);
+    charts['cSeg'].update();
+  }
+  // Update ship
+  let ship=D.ship;
+  if(sh!=='all') ship=ship.filter(x=>x.ship_mode===sh);
+  if(charts['cShip']){
+    charts['cShip'].data.labels=ship.map(x=>x.ship_mode);
+    charts['cShip'].data.datasets[0].data=ship.map(x=>x.sales);
+    charts['cShip'].data.datasets[1].data=ship.map(x=>x.avg_days);
+    charts['cShip'].update();
+  }
+  // Update channel
+  let chn=D.channel;
+  if(ch!=='all') chn=chn.filter(x=>x.campaign_channel===ch);
+  if(charts['cCh']){
+    charts['cCh'].data.labels=chn.map(x=>x.campaign_channel);
+    charts['cCh'].data.datasets[0].data=chn.map(x=>x.sales);
+    charts['cCh'].data.datasets[1].data=chn.map(x=>x.margin);
+    charts['cCh'].update();
+  }
+}
+
+function rf(){
+  ['fY','fR','fC','fS','fSh','fCh'].forEach(id=>document.getElementById(id).value='all');
+  buildAll();
+  document.getElementById('fs').textContent='';
+}
+
+window.onload=()=>buildAll();
+</script>
+</body>
+</html>
