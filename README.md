@@ -142,35 +142,10 @@ See `outputs/dashboard_story.md` for full leadership narrative.
 
 ---
 
-## Screenshots
 
-| File | Contents |
-|------|---------|
-| `screenshots/full_dashboard.png` | Complete 7-section executive dashboard |
-| `screenshots/sales_trend_view.png` | Monthly sales & profit + margin trend |
-| `screenshots/regional_performance_view.png` | State-level and regional charts |
-| `screenshots/category_profitability_view.png` | Sub-category margin + category revenue |
-| `screenshots/filter_interaction_view.png` | Technology + 2025 filter applied |
 
 ---
 
-## File Structure
 
-```
-part4/
-├── data/dashboard_sales_data.xlsx
-├── tableau/
-│   ├── executive_dashboard.twbx      ← Tableau packaged workbook
-│   └── executive_dashboard.html      ← Interactive HTML (open in browser)
-├── outputs/
-│   ├── business_insights.md
-│   ├── dashboard_story.md
-│   └── chart_selection_justification.md
-├── screenshots/
-│   ├── full_dashboard.png
-│   ├── sales_trend_view.png
-│   ├── regional_performance_view.png
-│   ├── category_profitability_view.png
-│   └── filter_interaction_view.png
 └── README.md
 ```
